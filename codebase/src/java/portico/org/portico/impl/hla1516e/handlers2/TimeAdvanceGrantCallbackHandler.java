@@ -17,6 +17,7 @@ package org.portico.impl.hla1516e.handlers2;
 import java.util.Map;
 
 import org.portico.impl.hla1516e.types.time.DoubleTime;
+import org.portico.impl.hla1516e.types.time.LongTime;
 import org.portico.lrc.compat.JConfigurationException;
 import org.portico2.common.messaging.MessageContext;
 import org.portico2.common.services.time.msg.TimeAdvanceGrant;
@@ -51,7 +52,8 @@ public class TimeAdvanceGrantCallbackHandler extends LRC1516eCallbackHandler
 	public void callback( MessageContext context ) throws FederateInternalError
 	{
 		TimeAdvanceGrant grant = context.getRequest( TimeAdvanceGrant.class, this );
-		LogicalTime<?,?> theTime = new DoubleTime( grant.getTime() );
+		LogicalTime<?,?> theTime = helper.getState().isFloatTime() ?
+				new DoubleTime( grant.getTime() ) : new LongTime((long) grant.getTime());
 		if( logger.isTraceEnabled() )
 			logger.trace( "CALLBACK timeAdvanceGrant(time="+theTime+")" );
 		fedamb().timeAdvanceGrant( theTime );

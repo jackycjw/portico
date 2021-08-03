@@ -46,9 +46,7 @@ import org.portico.impl.hla1516e.types.HLA1516eParameterHandleValueMapFactory;
 import org.portico.impl.hla1516e.types.HLA1516eRegionHandleSetFactory;
 import org.portico.impl.hla1516e.types.HLA1516eResignAction;
 import org.portico.impl.hla1516e.types.HLA1516eTransportationTypeHandleFactory;
-import org.portico.impl.hla1516e.types.time.DoubleTime;
-import org.portico.impl.hla1516e.types.time.DoubleTimeFactory;
-import org.portico.impl.hla1516e.types.time.DoubleTimeInterval;
+import org.portico.impl.hla1516e.types.time.*;
 import org.portico.lrc.PorticoConstants;
 import org.portico.lrc.compat.JAsynchronousDeliveryAlreadyDisabled;
 import org.portico.lrc.compat.JAsynchronousDeliveryAlreadyEnabled;
@@ -418,6 +416,7 @@ public abstract class Rti1516eAmbassador implements RTIambassador
 				throw new CouldNotCreateLogicalTimeFactory( "Invalid time implementation: Must be "+
 				                                            "\"HLAfloat64Time\" or \"HLAinteger64Time\"" );
 			}
+			this.getHelper().getState().setTimeName(timeName);
 		}
 
 		// validate the time type and hand off to the (String,URL[]) overload
@@ -450,6 +449,7 @@ public abstract class Rti1516eAmbassador implements RTIambassador
 				throw new CouldNotCreateLogicalTimeFactory( "Invalid time implementation: Must be "+
 				                                            "\"HLAfloat64Time\" or \"HLAinteger64Time\"" );
 			}
+			this.getHelper().getState().setTimeName(timeName);
 		}
 
 		// validate the time parameter and hand off to the (String,URL[],URL) overload
@@ -2195,8 +2195,14 @@ public abstract class Rti1516eAmbassador implements RTIambassador
 		// 0. check that we have the right logical time class //
 		////////////////////////////////////////////////////////
 		double doubleTime = PorticoConstants.NULL_TIME;
-		if( theTime != null )
-			doubleTime = DoubleTime.fromTime( theTime );
+		if( theTime != null ) {
+			if (getHelper().getState().isFloatTime()) {
+				doubleTime = DoubleTime.fromTime( theTime );
+			} else {
+				doubleTime = ((LongTime)theTime).getTime();
+			}
+		}
+
 
 		HashMap<Integer,byte[]> map = HLA1516eAttributeHandleValueMap.toJavaMap( theAttributes );
 		int oHandle = HLA1516eHandle.fromHandle( theObject );
@@ -3630,7 +3636,12 @@ public abstract class Rti1516eAmbassador implements RTIambassador
 		////////////////////////////////////////////////////////
 		// 0. check that we have the right logical time class //
 		////////////////////////////////////////////////////////
-		double la = DoubleTimeInterval.fromLookahead( theLookahead );
+		double la = 0;
+		if (getHelper().getState().isFloatTime()) {
+			la = DoubleTimeInterval.fromLookahead( theLookahead );
+		} else {
+			la = ((LongTimeInterval)theLookahead).getTime();
+		}
 		
 		///////////////////////////////////////////////////////
 		// 1. create the message and pass it to the LRC sink //
@@ -3902,7 +3913,8 @@ public abstract class Rti1516eAmbassador implements RTIambassador
 		////////////////////////////////////////////////////////
 		// 0. check that we have the right logical time class //
 		////////////////////////////////////////////////////////
-		double time = DoubleTime.fromTime( theTime ); // also checks for null
+		double time = getHelper().getState().isFloatTime() ?
+				DoubleTime.fromTime( theTime ) : ((LongTime)theTime).getTime(); // also checks for null
 		
 		///////////////////////////////////////////////////////
 		// 1. create the message and pass it to the LRC sink //
@@ -5855,6 +5867,12 @@ return "";
 
 	public LogicalTimeFactory getTimeFactory() throws FederateNotExecutionMember, NotConnected
 	{
+		if ("HLAinteger64Time".equals(this.helper.getState().getTimeName())) {
+			return new LongTimeFactory();
+		}
+		if ("HLAfloat64Time".equals(this.helper.getState().getTimeName())) {
+			return new DoubleTimeFactory();
+		}
 		return new DoubleTimeFactory();
 	}
 

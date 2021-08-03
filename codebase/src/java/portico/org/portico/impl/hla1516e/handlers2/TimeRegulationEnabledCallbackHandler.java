@@ -17,6 +17,7 @@ package org.portico.impl.hla1516e.handlers2;
 import java.util.Map;
 
 import org.portico.impl.hla1516e.types.time.DoubleTime;
+import org.portico.impl.hla1516e.types.time.LongTime;
 import org.portico.lrc.compat.JConfigurationException;
 import org.portico2.common.messaging.MessageContext;
 
@@ -49,7 +50,9 @@ public class TimeRegulationEnabledCallbackHandler extends LRC1516eCallbackHandle
 	@Override
 	public void callback( MessageContext context ) throws FederateInternalError
 	{
-		LogicalTime<?,?> currentTime = new DoubleTime( lrcState.getCurrentTime() );
+		LogicalTime<?,?> currentTime = lrcState.isFloatTime() ?
+				new DoubleTime( lrcState.getCurrentTime() ) : new LongTime((long) lrcState.getCurrentTime());
+
 		logger.trace( "CALLBACK timeRegulationEnabled(time="+currentTime+")" );
 		fedamb().timeRegulationEnabled( currentTime );
 		helper.reportServiceInvocation( "timeRegulationEnabled", true, null, currentTime );

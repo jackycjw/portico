@@ -49,6 +49,8 @@ public class LRCState
 	private int     federateHandle;
 	private int     federationHandle;
 	private String  federationName;
+	//时间格式
+	private String timeName = "HLAfloat64Time";
 	private boolean joined;
 
 	// Object Model //
@@ -363,6 +365,18 @@ public class LRCState
 	public void setFederationName( String federationName )
 	{
 		this.federationName = federationName;
+	}
+
+	public String getTimeName() {
+		return timeName;
+	}
+
+	public boolean isFloatTime(){
+		return "HLAfloat64Time".equals(this.getTimeName());
+	}
+
+	public void setTimeName(String timeName) {
+		this.timeName = timeName;
 	}
 
 	////////////////////////////////////////////////////////////

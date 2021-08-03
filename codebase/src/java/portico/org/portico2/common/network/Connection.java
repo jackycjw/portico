@@ -253,8 +253,10 @@ public class Connection
 	public void sendControlRequest( MessageContext context ) throws JRTIinternalError
 	{
 		// FIXME -- REMOVE ME -- Left here on purpose to flag an issue.
-		if( context.getRequest().isAsync() )
-			throw new JRTIinternalError( "Async Messages no longer supported - move to Notificatins" );
+		if( context.getRequest().isAsync() ){
+//			throw new JRTIinternalError( "Async Messages no longer supported - move to Notificatins" );
+		}
+
 		
 		// Get an ID for the request
 		int requestId = responseCorrelator.register();
@@ -263,6 +265,11 @@ public class Connection
 		PorticoMessage request = context.getRequest();
 		protocolStack.down( new Message(request,CallType.ControlRequest,requestId) );
 
+
+		//如果异步直接返回
+		if (context.getRequest().isAsync()) {
+			return;
+		}
 		// Wait for the response
 		ResponseMessage response = responseCorrelator.waitFor( requestId );
 
