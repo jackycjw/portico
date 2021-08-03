@@ -50,7 +50,7 @@ public class LRCState
 	private int     federationHandle;
 	private String  federationName;
 	//时间格式
-	private String timeName = "HLAfloat64Time";
+	private String timeName = "HLAinteger64Time";
 	private boolean joined;
 
 	// Object Model //
