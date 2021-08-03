@@ -33,3 +33,7 @@
 
 # /codebase/lib/clover/
 /codebase/lib/clover/clover.license
+classes/*
+.idea/*
+*.iml
+*.log
